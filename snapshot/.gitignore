@@ -6,6 +6,7 @@ components.d.ts
 auto-imports.d.ts
 
 # local env file
+.env
 .env.local
 .env.*.local
 

@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import {ITurtleShellFirewallIncreaser} from "../turtleshell/interfaces/ITurtleShellFirewallIncreaser.sol";
+import {ITurtleShellFirewallIncreaser} from "../turtleshell/sdk/interfaces/ITurtleShellFirewallIncreaser.sol";
+import {ITurtleShellFreezer} from "../turtleshell/sdk/interfaces/ITurtleShellFreezer.sol";
+
 import {IProtocol} from "./interfaces/IProtocol.sol";
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -9,14 +11,16 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract FirewalledProtocol is IProtocol, Ownable {
     ITurtleShellFirewallIncreaser public turtleShell;
+    ITurtleShellFreezer public turtleShellFreezer;
 
     IERC20 private s_usdc;
 
     mapping(address => uint256) public balances;
 
-    constructor(address _usdcAddress, address _turtleShellAddress) {
+    constructor(address _usdcAddress, address _turtleShellAddress, address _turtleShellFreezer) {
         s_usdc = IERC20(_usdcAddress);
         turtleShell = ITurtleShellFirewallIncreaser(_turtleShellAddress);
+        turtleShellFreezer = ITurtleShellFreezer(_turtleShellFreezer);
     }
 
     function initialize() public onlyOwner {
@@ -54,7 +58,13 @@ contract FirewalledProtocol is IProtocol, Ownable {
         );
 
         bool firewallTriggered = turtleShell.decreaseParameter(withdrawAmount);
-        if (firewallTriggered) return;
+
+        // integrate TurtleShellFreezer
+        if (firewallTriggered) {
+            s_usdc.approve(address(turtleShellFreezer), withdrawAmount);
+            turtleShellFreezer.freezeFunds(msg.sender, withdrawAmount, address(s_usdc));
+            return;
+        }
         
         require(
             s_usdc.transfer(msg.sender, withdrawAmount),
