@@ -58,23 +58,17 @@ module.exports = {
       saveDeployments: true,
       chainId: 5,
     },
-    polygonZkEvm: {
-      url: "https://rpc.public.zkevm-test.net",
+    polygon: {
+      url: "https://polygon-rpc.com/",
       accounts: [DEPLOYER_PRIVATE_KEY],
       saveDeployments: true,
-      chainId: 1442,
+      chainId: 137,
     },
     gnosisChain: {
       url: "https://rpc.gnosischain.com",
       accounts: [DEPLOYER_PRIVATE_KEY],
       saveDeployments: true,
       chainId: 100,
-    },
-    gnosisChainTestnet: {
-      url: "https://rpc.chiadochain.net",
-      accounts: [DEPLOYER_PRIVATE_KEY],
-      saveDeployments: true,
-      chainId: 10200,
     },
   },
   etherscan: {
@@ -269,7 +263,9 @@ task("queue", "Queue a proposal")
 // hh execute --network localhost --user address --token address --description text
 task("execute", "Execute a proposal")
   .addParam("description", "The proposal description")
-  .setAction(async taskArgs => {
+  .setAction(async (taskArgs, hre) => {
+    const deployer = (await hre.getNamedAccounts()).deployer
+
     const governor = await ethers.getContract("ProtocolGovernor")
     const turtleShellFreezer = await ethers.getContract("TurtleShellFreezer")
     const usdc = await ethers.getContract("Usdc")
@@ -291,4 +287,11 @@ task("execute", "Execute a proposal")
 
     const lockedFundsAfter = await turtleShellFreezer.getFrozenFundsOf(attackContractAddress, usdcAddress)
     console.log("Locked funds after resolve:", lockedFundsAfter)
+
+    // withdraw funds from attacker
+    const stealTx = await attackContract.steal()
+    await stealTx.wait(1)
+
+    const usdcBalanceOfAttacker = await usdc.balanceOf(deployer)
+    console.log(`USDC balance retrieved from the resolve: ${ethers.formatEther(usdcBalanceOfAttacker)}`)
   })
