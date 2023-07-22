@@ -1,3 +1,10 @@
+const { developmentChains } = require("./helper-hardhat-config")
+const { propose, queue, execute } = require("./utils/governance/governance")
+
+const VOTING_DELAY = 1 // How many blocks till a proposal vote becomes active
+const MIN_DELAY = 1 // Min delay before voting can be enacted
+const VOTING_PERIOD = 13 // Time during which you can vote after a proposal is created
+
 require("@nomicfoundation/hardhat-toolbox")
 require("hardhat-deploy")
 require("@nomiclabs/hardhat-etherscan")
@@ -89,30 +96,104 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   }
 })
 
-// hh propose --network localhost --proposalid string
-task("propose", "Propose a proposal")
-  .addParam("user", "The user to transfer the frozen funds to")
-  .addParam("token", "The token to transfer")
-  .addParam("description", "The proposal description")
-  .setAction(async taskArgs => {
-    const governor = await ethers.getContract("ProtocolGovernor")
-    const turtleShellFreezer = await ethers.getContract("TurtleShellFreezer")
-    const turtleShellFreezerAddress = await turtleShellFreezer.getAddress()
-    const user = taskArgs.user // Get user address from command line argument
-    const tokenAddress = taskArgs.token // Get token address from command line argument
-    const proposal_description = taskArgs.description // Get proposal description from command line argument
-    const transferCalldata = turtleShellFreezer.interface.encodeFunctionData("unlockFunds", [user, tokenAddress])
-    const descriptionHash = ethers.id(proposal_description)
+task("attack-firewalled-protocol", "Attack FirewalledProtocol").setAction(async (taskArgs, hre) => {
+  const isDevelopmentChain = developmentChains.includes(hre.network.name)
 
-    const tx = await governor.propose([turtleShellFreezerAddress], [0], [transferCalldata], descriptionHash)
-    await tx.wait()
-    console.log("Created proposal successfully")
-  })
+  const attackContract = await ethers.getContract("AttackContract")
+  const attackContractAddress = await attackContract.getAddress()
+  const firewalledProtocol = await ethers.getContract("FirewalledProtocol")
+  const firewalledProtocolAddress = await firewalledProtocol.getAddress()
+
+  const attackTx = await attackContract.attack(firewalledProtocolAddress)
+  await attackTx.wait(1)
+
+  // creating the proposal
+
+  const moveBlocks = async function (network, amount) {
+    console.log("Moving blocks...")
+    for (let index = 0; index < amount; index++) {
+      await network.provider.request({
+        method: "evm_mine",
+        params: [],
+      })
+    }
+    console.log(`Moved ${amount} blocks`)
+  }
+
+  const usdc = await ethers.getContract("Usdc")
+  const usdcAddress = await usdc.getAddress()
+  const protocolGovernor = await ethers.getContract("ProtocolGovernor")
+  const firewallFreezer = await ethers.getContract("TurtleShellFreezer")
+  const firewallFreezerAddress = await firewallFreezer.getAddress()
+  const blockNumber = await ethers.provider.getBlockNumber()
+
+  const targets = [firewallFreezerAddress]
+  const etherValues = [0]
+  const encodedFunctionCalls = [
+    firewallFreezer.interface.encodeFunctionData("unlockFunds", [attackContractAddress, usdcAddress]),
+  ]
+  const description = `Unlock funds from FirewalledProtocol #${blockNumber}`
+
+  const proposalId = await propose(protocolGovernor, targets, etherValues, encodedFunctionCalls, description)
+  console.log(`Created new proposal (id: ${proposalId})\nDescription: ${description}`)
+
+  if (isDevelopmentChain) {
+    await moveBlocks(hre.network, VOTING_DELAY + 1)
+  }
+})
+
+// task("create-unlock-proposal", "Create a proposal to unlock funds").setAction(async (taskArgs, hre) => {
+//   const moveBlocks = async function (network, amount) {
+//     console.log("Moving blocks...")
+//     for (let index = 0; index < amount; index++) {
+//       await network.provider.request({
+//         method: "evm_mine",
+//         params: [],
+//       })
+//     }
+//     console.log(`Moved ${amount} blocks`)
+//   }
+
+//   const { deployer } = await getNamedAccounts()
+//   const isDevelopmentChain = developmentChains.includes(hre.network.name)
+
+//   const usdc = await ethers.getContract("Usdc", deployer)
+//   const usdcAddress = await usdc.getAddress()
+//   const protocolGovernor = await ethers.getContract("ProtocolGovernor", deployer)
+//   const firewallFreezer = await ethers.getContract("TurtleShellFreezer", deployer)
+//   const firewallFreezerAddress = await firewallFreezer.getAddress()
+//   const blockNumber = await ethers.provider.getBlockNumber()
+
+//   const targets = [firewallFreezerAddress]
+//   const etherValues = [0]
+//   const encodedFunctionCalls = [firewallFreezer.interface.encodeFunctionData("unlockFunds", [deployer, usdcAddress])]
+//   const description = `Unlock funds from FirewalledProtocol #${blockNumber}`
+
+//   const proposalId = await propose(protocolGovernor, targets, etherValues, encodedFunctionCalls, description)
+//   console.log(`Created new proposal (id: ${proposalId})\nDescription: ${description}`)
+
+//   if (isDevelopmentChain) {
+//     await moveBlocks(hre.network, VOTING_DELAY + 1)
+//   }
+// })
 
 // hh vote --network localhost --proposalid string
 task("vote", "Vote on proposal")
   .addParam("proposalid", "The proposal id to vote on")
   .setAction(async taskArgs => {
+    const moveBlocks = async function (network, amount) {
+      console.log("Moving blocks...")
+      for (let index = 0; index < amount; index++) {
+        await network.provider.request({
+          method: "evm_mine",
+          params: [],
+        })
+      }
+      console.log(`Moved ${amount} blocks`)
+    }
+
+    const isDevelopmentChain = developmentChains.includes(hre.network.name)
+
     const governor = await ethers.getContract("ProtocolGovernor")
     const proposalId = taskArgs.proposalid // Get proposalId from command line argument
     console.log(`Voting on proposal ${proposalId}`)
@@ -122,43 +203,67 @@ task("vote", "Vote on proposal")
     const tx = await governor.castVoteWithReason(proposalId, voteWay, reason)
     await tx.wait()
     console.log("Voted successfully")
+
+    if (isDevelopmentChain) {
+      await moveBlocks(hre.network, VOTING_PERIOD + 1)
+    }
   })
 
 // hh queue --network localhost --user address --token address --description text
 task("queue", "Queue a proposal")
-  .addParam("user", "The user to transfer the frozen funds to")
-  .addParam("token", "The token to transfer")
   .addParam("description", "The proposal description")
-  .setAction(async taskArgs => {
+  .setAction(async (taskArgs, hre) => {
+    const moveTime = async function (network, amount) {
+      await network.provider.send("evm_increaseTime", [amount])
+      console.log(`Moved forward in time ${amount} seconds`)
+    }
+
+    const isDevelopmentChain = developmentChains.includes(hre.network.name)
+
     const governor = await ethers.getContract("ProtocolGovernor")
     const turtleShellFreezer = await ethers.getContract("TurtleShellFreezer")
+    const usdc = await ethers.getContract("Usdc")
+    const usdcAddress = await usdc.getAddress()
+    const attackContract = await ethers.getContract("AttackContract")
+    const attackContractAddress = await attackContract.getAddress()
     const turtleShellFreezerAddress = await turtleShellFreezer.getAddress()
-    const user = taskArgs.user // Get user address from command line argument
-    const tokenAddress = taskArgs.token // Get token address from command line argument
     const proposal_description = taskArgs.description // Get proposal description from command line argument
-    const transferCalldata = turtleShellFreezer.interface.encodeFunctionData("unlockFunds", [user, tokenAddress])
-    const descriptionHash = ethers.id(proposal_description)
+    const transferCalldata = turtleShellFreezer.interface.encodeFunctionData("unlockFunds", [
+      attackContractAddress,
+      usdcAddress,
+    ])
 
-    await governor.queue([turtleShellFreezerAddress], [0], [transferCalldata], descriptionHash)
+    await queue(governor, [turtleShellFreezerAddress], [0], [transferCalldata], proposal_description)
     console.log("Queued successfully")
+
+    if (isDevelopmentChain) {
+      await moveTime(hre.network, MIN_DELAY + 1)
+    }
   })
 
 // hh execute --network localhost --user address --token address --description text
 task("execute", "Execute a proposal")
-  .addParam("user", "The user to transfer the frozen funds to")
-  .addParam("token", "The token to transfer")
   .addParam("description", "The proposal description")
   .setAction(async taskArgs => {
     const governor = await ethers.getContract("ProtocolGovernor")
     const turtleShellFreezer = await ethers.getContract("TurtleShellFreezer")
+    const usdc = await ethers.getContract("Usdc")
+    const usdcAddress = await usdc.getAddress()
+    const attackContract = await ethers.getContract("AttackContract")
+    const attackContractAddress = await attackContract.getAddress()
     const turtleShellFreezerAddress = await turtleShellFreezer.getAddress()
-    const user = taskArgs.user // Get user address from command line argument
-    const tokenAddress = taskArgs.token // Get token address from command line argument
     const proposal_description = taskArgs.description // Get proposal description from command line argument
-    const transferCalldata = turtleShellFreezer.interface.encodeFunctionData("unlockFunds", [user, tokenAddress])
-    const descriptionHash = ethers.id(proposal_description)
+    const transferCalldata = turtleShellFreezer.interface.encodeFunctionData("unlockFunds", [
+      attackContractAddress,
+      usdcAddress,
+    ])
 
-    const executeTx = await governor.execute([turtleShellFreezerAddress], [0], [transferCalldata], descriptionHash)
-    await executeTx.wait()
+    const lockedFundsBefore = await turtleShellFreezer.getFrozenFundsOf(attackContractAddress, usdcAddress)
+    console.log("Locked funds before:", ethers.formatEther(lockedFundsBefore))
+
+    await execute(governor, [turtleShellFreezerAddress], [0], [transferCalldata], proposal_description)
     console.log("Executed successfully")
+
+    const lockedFundsAfter = await turtleShellFreezer.getFrozenFundsOf(attackContractAddress, usdcAddress)
+    console.log("Locked funds after resolve:", lockedFundsAfter)
   })

@@ -150,13 +150,6 @@ const { developmentChains } = require("../helper-hardhat-config")
 
             assert.equal(freezerBalance.toString(), (freezerBalanceBefore + largeWithdrawAmount).toString())
           })
-
-          it("creates proposal on governor", async () => {
-            await expect(FirewalledProtocol.withdraw(largeWithdrawAmount)).to.emit(
-              FirewalledProtocol,
-              "UnlockProposalCreated",
-            )
-          })
         })
       })
     })

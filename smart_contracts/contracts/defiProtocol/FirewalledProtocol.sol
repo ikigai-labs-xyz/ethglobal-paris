@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
+import "hardhat/console.sol";
+
 import {ITurtleShellFirewallIncreaser} from "../turtleshell/sdk/interfaces/ITurtleShellFirewallIncreaser.sol";
 import {ITurtleShellFreezer} from "../turtleshell/sdk/interfaces/ITurtleShellFreezer.sol";
 import {ITurtleShellFreezerUser} from "../turtleshell/sdk/interfaces/ITurtleShellFreezerUser.sol";
@@ -29,6 +31,11 @@ contract FirewalledProtocol is IProtocol, ITurtleShellFreezerUser, Ownable {
 
     function initialize() public onlyOwner {
         turtleShell.setUserConfig(15, 10, 0, 8);
+    }
+
+    function _handleFirewall(uint256 withdrawAmount) internal {
+        s_usdc.approve(address(turtleShellFreezer), withdrawAmount);
+        turtleShellFreezer.freezeFunds(msg.sender, withdrawAmount, address(s_usdc));
     }
 
     function deposit(uint256 depositAmount) external override {
@@ -63,31 +70,7 @@ contract FirewalledProtocol is IProtocol, ITurtleShellFreezerUser, Ownable {
 
         // integrate TurtleShellFreezer
         if (firewallTriggered) {
-            s_usdc.approve(address(turtleShellFreezer), withdrawAmount);
-            turtleShellFreezer.freezeFunds(msg.sender, withdrawAmount, address(s_usdc));
-
-            address[] memory targets = new address[](1);
-            targets[0] = address(turtleShellFreezer);
-
-            uint256[] memory values = new uint256[](1);
-            values[0] = 0;
-
-            bytes[] memory call_data = new bytes[](1);
-            call_data[0] = abi.encodeWithSignature("unfreezeFunds(address,uint256,address)", msg.sender, withdrawAmount, address(s_usdc));
-
-            string memory description = string(abi.encodePacked("Unfreeze funds at block ", block.number));
-
-            try IGovernor(governor).propose(
-                targets,
-                values,
-                call_data,
-                description
-            ) returns (uint256 proposalId) {
-                emit UnlockProposalCreated(proposalId);
-            } catch {
-                // do nothing
-            }
-
+            _handleFirewall(withdrawAmount);
             return;
         }
         
@@ -109,7 +92,11 @@ contract FirewalledProtocol is IProtocol, ITurtleShellFreezerUser, Ownable {
         );
 
         bool firewallTriggered = turtleShell.decreaseParameter(withdrawAmount);
-        if (firewallTriggered) return;
+        // integrate TurtleShellFreezer
+        if (firewallTriggered) {
+            _handleFirewall(withdrawAmount);
+            return;
+        }
 
         require(
             s_usdc.transfer(msg.sender, withdrawAmount),
