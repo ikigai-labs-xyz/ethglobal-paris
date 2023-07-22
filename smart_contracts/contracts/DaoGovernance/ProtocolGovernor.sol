@@ -25,11 +25,11 @@ contract ProtocolGovernor is
     {}
 
     function votingDelay() public pure override returns (uint256) {
-        return 7200; // 1 day
+        return 1; // (7200 = 1 day)
     }
 
     function votingPeriod() public pure override returns (uint256) {
-        return 50400; // 1 week
+        return 13; // (7200 = 1 day)
     }
 
     function proposalThreshold() public pure override returns (uint256) {

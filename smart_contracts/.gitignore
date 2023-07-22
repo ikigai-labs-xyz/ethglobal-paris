@@ -16,8 +16,6 @@ cache/
 # Temporary files
 **/tmp/
 
-.prettierrc
-
 .gas-snapshot
 node_modules
 .env

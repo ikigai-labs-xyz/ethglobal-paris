@@ -13,6 +13,7 @@ module.exports = async (hre) => {
   const waitBlockConfirmations = developmentChains.includes(network.name)
     ? 1
     : VERIFICATION_BLOCK_CONFIRMATIONS;
+  const MIN_DELAY = 1; // Min delay before voting can be enacted
 
   /***********************************
    *
@@ -21,13 +22,10 @@ module.exports = async (hre) => {
    ************************************/
 
   log("---------------------------------");
-  log(`Deploy GovernanceToken with owner : ${deployer}`);
+  log(`Deploy TimeLock with owner : ${deployer}`);
 
-  const usdc = await ethers.getContract("Usdc", deployer);
-  const usdcAddress = await usdc.getAddress();
-
-  const arguments = [];
-  await deploy("GovernanceToken", {
+  const arguments = [MIN_DELAY, [], [], deployer];
+  await deploy("TimeLock", {
     from: deployer,
     args: arguments,
     log: true,
@@ -35,9 +33,9 @@ module.exports = async (hre) => {
   });
 
   log("---------------------------------");
-  log(`deployed GovernanceToken with owner : ${deployer}`);
+  log(`deployed TimeLock with owner : ${deployer}`);
 
   log("----------------------------------------------------");
 };
 
-module.exports.tags = ["all", "GovernanceToken"];
+module.exports.tags = ["all", "TimeLock"];

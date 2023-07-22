@@ -32,7 +32,8 @@ interface ITurtleShellFirewall {
         uint256 blockInterval,
         uint256 startParameter,
         uint256 cooldownPeriod
-    ) external;
+    )
+        external;
 
     /**
      * @notice Function for manually setting the firewall status for a given user
@@ -62,7 +63,5 @@ interface ITurtleShellFirewall {
      * @param user The address to get the security parameters for
      * @return Returns The threshold and block interval set as security parameters for the address
      */
-    function getSecurityParameterConfigOf(
-        address user
-    ) external view returns (uint8, uint256);
+    function getSecurityParameterConfigOf(address user) external view returns (uint8, uint256);
 }
