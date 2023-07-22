@@ -10,6 +10,7 @@ const { developmentChains } = require("../helper-hardhat-config")
         FirewalledProtocol,
         turtleshell,
         turtleShellFreezer,
+        governor,
         turtleShellFreezerAddress,
         firewalledProtocolAddress,
         usdc
@@ -17,20 +18,30 @@ const { developmentChains } = require("../helper-hardhat-config")
       const withdrawAmount = ethers.parseUnits("30", 6)
 
       beforeEach(async () => {
-        await deployments.fixture(["TurtleShellFirewall", "Usdc", "TurtleShellFreezer", "FirewalledProtocol"])
+        await deployments.fixture([
+          "TurtleShellFirewall",
+          "Usdc",
+          "TurtleShellFreezer",
+          "FirewalledProtocol",
+          "SetupFirewalledProtocol",
+          "GovernanceToken",
+          "ProtocolGovernor",
+          "TimeLock",
+          "SetupGovernance",
+        ])
 
         deployer = (await getNamedAccounts()).deployer
         user = (await getNamedAccounts()).user1
 
         usdc = await ethers.getContract("Usdc", deployer)
-        const usdcTokenAddress = await usdc.getAddress()
         turtleshell = await ethers.getContract("TurtleShellFirewall", deployer)
         turtleShellFreezer = await ethers.getContract("TurtleShellFreezer", deployer)
         turtleShellFreezerAddress = await turtleShellFreezer.getAddress()
 
         FirewalledProtocol = await ethers.getContract("FirewalledProtocol", deployer)
         firewalledProtocolAddress = await FirewalledProtocol.getAddress()
-        await FirewalledProtocol.initialize()
+
+        governor = await ethers.getContract("ProtocolGovernor", deployer)
 
         const amount = ethers.parseUnits("10000", 6)
         await usdc.mint(deployer, amount)
@@ -120,18 +131,31 @@ const { developmentChains } = require("../helper-hardhat-config")
         })
 
         describe("Withdraw more than 15% of the total TVL", () => {
-          it("triggers firewall and reverts", async () => {
-            const freezerBalanceBefore = await usdc.balanceOf(turtleShellFreezerAddress)
-            const largeWithdrawAmount = ethers.parseUnits("2000", 6)
+          let largeWithdrawAmount
+          before(async () => {
+            largeWithdrawAmount = ethers.parseUnits("2000", 6)
+          })
 
+          it("triggers firewall", async () => {
             await FirewalledProtocol.withdraw(largeWithdrawAmount)
 
             const firewallStatus = await turtleshell.getFirewallStatusOf(firewalledProtocolAddress)
             assert.equal(firewallStatus, true)
+          })
 
-            // check if funds got transferred to turtleshell freezer
+          it("freezes funds", async () => {
+            const freezerBalanceBefore = await usdc.balanceOf(turtleShellFreezerAddress)
+            await FirewalledProtocol.withdraw(largeWithdrawAmount)
             const freezerBalance = await usdc.balanceOf(turtleShellFreezerAddress)
+
             assert.equal(freezerBalance.toString(), (freezerBalanceBefore + largeWithdrawAmount).toString())
+          })
+
+          it("creates proposal on governor", async () => {
+            await expect(FirewalledProtocol.withdraw(largeWithdrawAmount)).to.emit(
+              FirewalledProtocol,
+              "UnlockProposalCreated",
+            )
           })
         })
       })

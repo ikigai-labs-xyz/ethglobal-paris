@@ -23,14 +23,14 @@ function Overview() {
 				<div className="col-start-5 col-span-4  rounded-lg border border-gray-200 bg-white shadow-md ">
 					<div className="text-black border-b border-slate-800/40">Borrow</div>
 					<div className="flex flex-row items-center justify-center gap-3 py-2">
-						<div className="text-slate-800 text-lg">amount xyz</div>
+						<div className="text-slate-800 text-lg">fetching data ...</div>
 					</div>
 				</div>
 
 				<div className="col-start-9 col-span-4 rounded-lg border border-gray-200 bg-white shadow-md ">
 					<div className="text-black border-b border-slate-800/40">Supply</div>
 					<div className="flex flex-row items-center justify-center gap-3 py-2">
-						<div className="text-slate-800 text-lg">amount xyz</div>
+						<div className="text-slate-800 text-lg">fetching data ...</div>
 					</div>
 				</div>
 			</div>
