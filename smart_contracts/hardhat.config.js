@@ -89,6 +89,26 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   }
 })
 
+// hh propose --network localhost --proposalid string
+task("propose", "Propose a proposal")
+  .addParam("user", "The user to transfer the frozen funds to")
+  .addParam("token", "The token to transfer")
+  .addParam("description", "The proposal description")
+  .setAction(async taskArgs => {
+    const governor = await ethers.getContract("ProtocolGovernor")
+    const turtleShellFreezer = await ethers.getContract("TurtleShellFreezer")
+    const turtleShellFreezerAddress = await turtleShellFreezer.getAddress()
+    const user = taskArgs.user // Get user address from command line argument
+    const tokenAddress = taskArgs.token // Get token address from command line argument
+    const proposal_description = taskArgs.description // Get proposal description from command line argument
+    const transferCalldata = turtleShellFreezer.interface.encodeFunctionData("unlockFunds", [user, tokenAddress])
+    const descriptionHash = ethers.id(proposal_description)
+
+    const tx = await governor.propose([turtleShellFreezerAddress], [0], [transferCalldata], descriptionHash)
+    await tx.wait()
+    console.log("Created proposal successfully")
+  })
+
 // hh vote --network localhost --proposalid string
 task("vote", "Vote on proposal")
   .addParam("proposalid", "The proposal id to vote on")
