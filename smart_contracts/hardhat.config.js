@@ -66,7 +66,7 @@ module.exports = {
     },
     gnosisChain: {
       url: "https://rpc.gnosischain.com",
-      accounts: [PRIVATE_KEY],
+      accounts: [DEPLOYER_PRIVATE_KEY],
       saveDeployments: true,
       chainId: 100,
     },
