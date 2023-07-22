@@ -5,7 +5,7 @@ const { verify } = require("../utils/verify")
 module.exports = async hre => {
   const { getNamedAccounts, deployments } = hre
   const { deploy, log } = deployments
-  const { deployer, user1 } = await getNamedAccounts()
+  const { deployer } = await getNamedAccounts()
 
   log(`Starting Firewalled protocol setup`)
 

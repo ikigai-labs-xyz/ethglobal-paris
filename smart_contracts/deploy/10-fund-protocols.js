@@ -5,7 +5,7 @@ const { verify } = require("../utils/verify")
 module.exports = async hre => {
   const { getNamedAccounts, deployments } = hre
   const { deploy, log } = deployments
-  const { deployer, user1 } = await getNamedAccounts()
+  const { deployer } = await getNamedAccounts()
 
   log(`Starting funding protocols`)
 
@@ -22,7 +22,7 @@ module.exports = async hre => {
   const totalAmount = String(totalAmountRaw)
   const depositAmount = String(depositAmountRaw)
 
-  // mint 10 million USDC to the user (from deployer)
+  // mint 10 million USDC to the deployer
   const mintTx = await usdc.mint(deployer, totalAmount)
   await mintTx.wait(1)
   log(`Minted 10 million USDC to deployer (${deployer})`)
@@ -34,11 +34,11 @@ module.exports = async hre => {
   await approveFirewalledProtocol.wait(1)
   log(`Approved infinite USDC to protected (firewalled) protocol (${firewalledProtocolAddress}) from deployer`)
 
-  // deposit 5million into the non firewalled protocol from user1
+  // deposit 5million into the non firewalled protocol from deployer
   await nonFirewalledProtocol.deposit(depositAmount)
   log(`Deposited 5 million USDC to non-protected protocol (${nonFirewalledProtocolAddress}) from deployer`)
 
-  // deposit 5million into the firewalled protocol from user1
+  // deposit 5million into the firewalled protocol from deployer
   await firewalledProtocol.deposit(depositAmount)
   log(`Deposited 5 million USDC to protected (firewalled) protocol (${firewalledProtocolAddress}) from deployer`)
 
