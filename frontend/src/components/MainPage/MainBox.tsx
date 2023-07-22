@@ -1,8 +1,9 @@
+import POAPs from "../POAPs";
 
 function MainBox() {
 
   return (
-
+<>
     <div className='grid grid-cols-12  items-center justify-center text-center '>
 
 
@@ -46,6 +47,9 @@ function MainBox() {
 
 
 </div>
+
+<POAPs />
+</>
 
   );
 }
