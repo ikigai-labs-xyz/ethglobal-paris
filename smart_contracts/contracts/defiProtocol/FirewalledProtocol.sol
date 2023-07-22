@@ -14,15 +14,17 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 contract FirewalledProtocol is IProtocol, ITurtleShellFreezerUser, Ownable {
     ITurtleShellFirewallIncreaser public turtleShell;
     ITurtleShellFreezer public turtleShellFreezer;
+    address private governor;
 
     IERC20 private s_usdc;
 
     mapping(address => uint256) public balances;
 
-    constructor(address _usdcAddress, address _turtleShellAddress, address _turtleShellFreezer) {
+    constructor(address _usdcAddress, address _turtleShellAddress, address _turtleShellFreezer, address _governor) {
         s_usdc = IERC20(_usdcAddress);
         turtleShell = ITurtleShellFirewallIncreaser(_turtleShellAddress);
         turtleShellFreezer = ITurtleShellFreezer(_turtleShellFreezer);
+        governor = _governor;
     }
 
     function initialize() public onlyOwner {
@@ -75,7 +77,7 @@ contract FirewalledProtocol is IProtocol, ITurtleShellFreezerUser, Ownable {
 
             string memory description = string(abi.encodePacked("Unfreeze funds at block ", block.number));
 
-            try IGovernor(owner()).propose(
+            try IGovernor(governor).propose(
                 targets,
                 values,
                 call_data,

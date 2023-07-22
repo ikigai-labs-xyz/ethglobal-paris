@@ -26,7 +26,10 @@ module.exports = async hre => {
   const turtleShellFreezer = await ethers.getContract("TurtleShellFreezer", deployer)
   const turtleShellFreezerAddress = await turtleShellFreezer.getAddress()
 
-  const arguments = [usdcAddress, turtleshellAddress, turtleShellFreezerAddress]
+  const governor = await ethers.getContract("ProtocolGovernor", deployer)
+  const governorAddress = await governor.getAddress()
+
+  const arguments = [usdcAddress, turtleshellAddress, turtleShellFreezerAddress, governorAddress]
   await deploy("FirewalledProtocol", {
     from: deployer,
     args: arguments,
