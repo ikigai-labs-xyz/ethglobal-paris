@@ -3,6 +3,12 @@ const { deployments, ethers, getNamedAccounts } = require("hardhat");
 const { developmentChains } = require("../helper-hardhat-config");
 const { moveBlocks } = require("../utils/move-blocks");
 const { moveTime } = require("../utils/move-time");
+const {
+  propose,
+  vote,
+  queue,
+  execute,
+} = require("../utils/governance/governance");
 
 const VOTING_DELAY = 1; // How many blocks till a proposal vote becomes active
 const MIN_DELAY = 1; // Min delay before voting can be enacted
@@ -10,7 +16,7 @@ const VOTING_PERIOD = 13; // Time during which you can vote after a proposal is 
 
 !developmentChains.includes(network.name)
   ? describe.skip
-  : describe.only("Governance", async () => {
+  : describe("Governance", async () => {
       let governor,
         governanceToken,
         governanceTokenAddress,
@@ -56,23 +62,16 @@ const VOTING_PERIOD = 13; // Time during which you can vote after a proposal is 
         );
 
         console.log("----- Create proposal -----");
-        const proposeTx = await governor.propose(
+        const proposalId = await propose(
+          governor,
           [governanceTokenAddress],
           [0],
           [transferCalldata],
           PROPOSAL_DESCRIPTION
         );
 
-        const proposeReceipt = await proposeTx.wait();
-        const events = proposeReceipt.logs?.map((log) =>
-          governor.interface.parseLog(log)
-        );
+        console.log("proposalId", proposalId);
 
-        const proposalCreatedEvent = events?.find(
-          (event) => event?.name === "ProposalCreated"
-        );
-
-        const proposalId = proposalCreatedEvent?.args?.proposalId;
         const proposalSate = await governor.state(proposalId);
         expect(proposalSate).to.equal(0);
 
@@ -81,26 +80,21 @@ const VOTING_PERIOD = 13; // Time during which you can vote after a proposal is 
         console.log("----- Vote FOR proposal -----");
         const voteWay = 1; // We vote FOR the proposal (0=against, 1=for, 2=abstain)
         const reason = "I support this proposal because I do what I want";
-        const voteTx = await governor.castVoteWithReason(
-          proposalId,
-          voteWay,
-          reason
-        );
-        await voteTx.wait(1);
+        await vote(governor, proposalId, voteWay, reason);
         proposalState = await governor.state(proposalId);
         assert.equal(proposalState.toString(), 1);
 
         await moveBlocks(VOTING_PERIOD + 1);
 
         console.log("----- Queue execution -----");
-        const descriptionHash = ethers.id(PROPOSAL_DESCRIPTION);
-        const queueTx = await governor.queue(
+        await queue(
+          governor,
           [governanceTokenAddress],
           [0],
           [transferCalldata],
-          descriptionHash
+          PROPOSAL_DESCRIPTION
         );
-        await queueTx.wait();
+
         await moveTime(MIN_DELAY + 1);
         await moveBlocks(1);
 
@@ -108,13 +102,13 @@ const VOTING_PERIOD = 13; // Time during which you can vote after a proposal is 
         console.log(`Current Proposal State: ${proposalState}`);
 
         console.log("----- Execute proposal -----");
-        const executeTx = await governor.execute(
+        await execute(
+          governor,
           [governanceTokenAddress],
           [0],
           [transferCalldata],
-          descriptionHash
+          PROPOSAL_DESCRIPTION
         );
-        await executeTx.wait(1);
 
         expect(await governanceToken.balanceOf(teamAddress)).to.equal(
           grantAmount
