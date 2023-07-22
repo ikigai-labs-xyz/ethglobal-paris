@@ -152,7 +152,10 @@ const { developmentChains } = require("../helper-hardhat-config")
           })
 
           it("creates proposal on governor", async () => {
-            // await expect(FirewalledProtocol.withdraw(largeWithdrawAmount)).to.emit(governor, "ProposalCreated")
+            await expect(FirewalledProtocol.withdraw(largeWithdrawAmount)).to.emit(
+              FirewalledProtocol,
+              "UnlockProposalCreated",
+            )
           })
         })
       })
