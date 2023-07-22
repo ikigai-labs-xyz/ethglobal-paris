@@ -17,17 +17,8 @@ module.exports = async hre => {
   log("---------------------------------")
   log(`Deploy with owner : ${deployer}`)
 
-  const usdc = await ethers.getContract("Usdc", deployer)
-  const usdcAddress = await usdc.getAddress()
-
-  const turtleshell = await ethers.getContract("TurtleShellFirewall", deployer)
-  const turtleshellAddress = await turtleshell.getAddress()
-
-  const turtleShellFreezer = await ethers.getContract("TurtleShellFreezer", deployer)
-  const turtleShellFreezerAddress = await turtleShellFreezer.getAddress()
-
-  const arguments = [usdcAddress, turtleshellAddress, turtleShellFreezerAddress]
-  await deploy("FirewalledProtocol", {
+  const arguments = []
+  await deploy("TurtleShellFreezer", {
     from: deployer,
     args: arguments,
     log: true,
@@ -40,14 +31,8 @@ module.exports = async hre => {
   log("---------------------------------")
   log(`deployed with owner : ${deployer}`)
 
-  const firewalledProtocol = await ethers.getContract("FirewalledProtocol", deployer)
-  await firewalledProtocol.initialize()
-  log("---------------------------------")
-  log(`FirewalledProtocol initialized Turtlteshell parameters`)
-
-  const contractAddress = await firewalledProtocol.getAddress()
-
-  await turtleShellFreezer.setProtocol(contractAddress)
+  // const freezer = await ethers.getContract("TurtleShellFreezer", deployer)
+  // const contractAddress = await freezer.getAddress()
 
   /***********************************
    *
@@ -55,10 +40,10 @@ module.exports = async hre => {
    *
    ************************************/
   // if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
-  // 	log(`Verifying ${contractAddress} ...`)
-  // 	await verify(contractAddress, arguments)
+  //   log(`Verifying ${contractAddress} ...`)
+  //   await verify(contractAddress, arguments)
   // }
   log("----------------------------------------------------")
 }
 
-module.exports.tags = ["all", "FirewalledProtocol"]
+module.exports.tags = ["all", "TurtleShellFreezer"]

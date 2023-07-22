@@ -17,8 +17,20 @@ module.exports = async hre => {
   log("---------------------------------")
   log(`Deploy with owner : ${deployer}`)
 
-  const arguments = []
-  await deploy("TurtleShellFreezer", {
+  const usdc = await ethers.getContract("Usdc", deployer)
+  const usdcAddress = await usdc.getAddress()
+
+  const turtleshell = await ethers.getContract("TurtleShellFirewall", deployer)
+  const turtleshellAddress = await turtleshell.getAddress()
+
+  const turtleShellFreezer = await ethers.getContract("TurtleShellFreezer", deployer)
+  const turtleShellFreezerAddress = await turtleShellFreezer.getAddress()
+
+  const governor = await ethers.getContract("ProtocolGovernor", deployer)
+  const governorAddress = await governor.getAddress()
+
+  const arguments = [usdcAddress, turtleshellAddress, turtleShellFreezerAddress, governorAddress]
+  await deploy("FirewalledProtocol", {
     from: deployer,
     args: arguments,
     log: true,
@@ -31,8 +43,12 @@ module.exports = async hre => {
   log("---------------------------------")
   log(`deployed with owner : ${deployer}`)
 
-  const freezer = await ethers.getContract("TurtleShellFreezer", deployer)
-  const contractAddress = await freezer.getAddress()
+  const firewalledProtocol = await ethers.getContract("FirewalledProtocol", deployer)
+  const firewalledProtocolAddress = await firewalledProtocol.getAddress()
+
+  const initializeTx = await firewalledProtocol.initialize()
+  await initializeTx.wait(1)
+  log(`Initialized FirewalledProtocol ${firewalledProtocolAddress}`)
 
   /***********************************
    *
@@ -40,10 +56,10 @@ module.exports = async hre => {
    *
    ************************************/
   // if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
-  //   log(`Verifying ${contractAddress} ...`)
-  //   await verify(contractAddress, arguments)
+  // 	log(`Verifying ${contractAddress} ...`)
+  // 	await verify(contractAddress, arguments)
   // }
   log("----------------------------------------------------")
 }
 
-module.exports.tags = ["all", "TurtleShellFreezer"]
+module.exports.tags = ["all", "FirewalledProtocol"]
