@@ -18,6 +18,8 @@ const DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY
 const USER_PRIVATE_KEY = process.env.USER_PRIVATE_KEY
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY
+const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL
+const PRIVATE_KEY = process.env.PRIVATE_KEY
 
 module.exports = {
   solidity: {
@@ -50,6 +52,12 @@ module.exports = {
       accounts: [DEPLOYER_PRIVATE_KEY, USER_PRIVATE_KEY],
       saveDeployments: true,
       chainId: 5001,
+    },
+    goerli: {
+      url: GOERLI_RPC_URL,
+      accounts: [PRIVATE_KEY],
+      saveDeployments: true,
+      chainId: 5,
     },
   },
   etherscan: {
