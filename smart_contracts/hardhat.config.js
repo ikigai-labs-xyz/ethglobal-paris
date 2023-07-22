@@ -15,7 +15,6 @@ require("dotenv").config()
 const MAINNET_RPC_URL = process.env.MAINNET_RPC_URL
 const MANTLE_TESTNET_RPC_URL = process.env.MANTLE_TESTNET_RPC_URL
 const DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY
-const USER_PRIVATE_KEY = process.env.USER_PRIVATE_KEY
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY
 const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL
@@ -55,7 +54,7 @@ module.exports = {
     },
     goerli: {
       url: GOERLI_RPC_URL,
-      accounts: [DEPLOYER_PRIVATE_KEY, USER_PRIVATE_KEY],
+      accounts: [DEPLOYER_PRIVATE_KEY],
       saveDeployments: true,
       chainId: 5,
     },
