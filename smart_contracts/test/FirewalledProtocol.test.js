@@ -10,7 +10,7 @@ const { developmentChains } = require("../helper-hardhat-config")
       const withdrawAmount = ethers.parseUnits("30", 6)
 
       beforeEach(async () => {
-        await deployments.fixture(["TurtleShellFirewall", "usdc"])
+        await deployments.fixture(["TurtleShellFirewall", "Usdc"])
 
         deployer = (await getNamedAccounts()).deployer
         user = (await getNamedAccounts()).user1
@@ -118,9 +118,10 @@ const { developmentChains } = require("../helper-hardhat-config")
         describe("Withdraw more than 15% of the total TVL", () => {
           it("triggers firewall and reverts", async () => {
             const largeWithdrawAmount = ethers.parseUnits("2000", 6)
-            await expect(FirewalledProtocol.withdraw(largeWithdrawAmount)).to.be.revertedWith(
-              "withdraw: Firewall triggered",
-            )
+            await FirewalledProtocol.withdraw(largeWithdrawAmount)
+
+            const firewallStatus = await turtleshell.getFirewallStatusOf(firewalledProtocolAddress)
+            assert.equal(firewallStatus, true)
           })
         })
       })

@@ -10,7 +10,7 @@ const { developmentChains } = require("../helper-hardhat-config")
       const withdrawAmount = ethers.parseUnits("30", 6)
 
       beforeEach(async () => {
-        await deployments.fixture(["usdc"])
+        await deployments.fixture(["Usdc"])
 
         deployer = (await getNamedAccounts()).deployer
         user = (await getNamedAccounts()).user1

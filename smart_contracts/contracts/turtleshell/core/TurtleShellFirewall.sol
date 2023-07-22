@@ -60,10 +60,7 @@ contract TurtleShellFirewall is ITurtleShellFirewall {
      */
     function _setParameter(uint256 newParamter) internal {
         uint32 nonce = s_firewallData[msg.sender].nonce;
-        s_firewallData[msg.sender].parameters[nonce] = ParameterData(
-            newParamter,
-            block.number
-        );
+        s_firewallData[msg.sender].parameters[nonce] = ParameterData(newParamter, block.number);
         s_firewallData[msg.sender].nonce++;
         emit ParameterChanged(msg.sender, newParamter);
     }
@@ -76,8 +73,9 @@ contract TurtleShellFirewall is ITurtleShellFirewall {
      */
     function _setFirewallStatus(bool newStatus) internal {
         s_firewallData[msg.sender].firewallActive = newStatus;
-        if (newStatus)
+        if (newStatus) {
             s_firewallData[msg.sender].lastActivatedBlock = block.number;
+        }
         emit FirewallStatusUpdate(msg.sender, newStatus);
     }
 
@@ -86,26 +84,19 @@ contract TurtleShellFirewall is ITurtleShellFirewall {
      * @param newParameter The new parameter to check
      * @return bool true if the parameter update exceeds the threshold, false otherwise
      */
-    function _checkIfParameterUpdateExceedsThreshold(
-        uint256 newParameter
-    ) internal view returns (bool) {
+    function _checkIfParameterUpdateExceedsThreshold(uint256 newParameter) internal view returns (bool) {
         FirewallConfig memory m_firewallConfig = s_firewallConfig[msg.sender];
 
         // Finding the ParameterData with a block number closest to 'block.number - m_firewallConfig.blockInterval'
-        uint256 targetBlockNumber = block.number -
-            m_firewallConfig.blockInterval;
+        uint256 targetBlockNumber = block.number - m_firewallConfig.blockInterval;
         uint256 referenceParameter;
         uint32 nonce = s_firewallData[msg.sender].nonce;
 
         for (uint32 i = nonce; i > 0; i--) {
-            if (
-                s_firewallData[msg.sender].parameters[i].blockNumber <=
-                targetBlockNumber
-            ) {
-                // TODO: find a solution to avoid accessing storage at every iteration (possibly store the value as an array in memory)
-                referenceParameter = s_firewallData[msg.sender]
-                    .parameters[i - 1]
-                    .parameter;
+            if (s_firewallData[msg.sender].parameters[i].blockNumber <= targetBlockNumber) {
+                // TODO: find a solution to avoid accessing storage at every iteration (possibly store the value as an
+                // array in memory)
+                referenceParameter = s_firewallData[msg.sender].parameters[i - 1].parameter;
                 break;
             }
         }
@@ -113,8 +104,7 @@ contract TurtleShellFirewall is ITurtleShellFirewall {
         // insufficient data
         if (referenceParameter == 0) return false;
 
-        uint256 thresholdAmount = (referenceParameter *
-            m_firewallConfig.thresholdPercentage) / 100;
+        uint256 thresholdAmount = (referenceParameter * m_firewallConfig.thresholdPercentage) / 100;
 
         if (newParameter > referenceParameter) {
             return newParameter - referenceParameter >= thresholdAmount;
@@ -142,16 +132,14 @@ contract TurtleShellFirewall is ITurtleShellFirewall {
         if (s_firewallData[msg.sender].firewallActive) {
             /// @dev check if the cooldown period has passed
             bool cooldownSurpassed = false;
-            if (
-                block.number - s_firewallData[msg.sender].lastActivatedBlock >
-                m_firewallConfig.cooldownPeriod
-            ) {
+            if (block.number - s_firewallData[msg.sender].lastActivatedBlock > m_firewallConfig.cooldownPeriod) {
                 _setFirewallStatus(false);
                 cooldownSurpassed = true;
 
                 //TODO: To discuss: we shouldn't update the firewall status as long as it is active
                 //If we make an early return here we prevent checking again the firewall status
-                // see https://github.com/ikigai-labs-xyz/hundred-finance-firewall-replica/pull/2/commits/09c5b312222afde44b26621645815238335b0944
+                // see
+                // https://github.com/ikigai-labs-xyz/hundred-finance-firewall-replica/pull/2/commits/09c5b312222afde44b26621645815238335b0944
             }
 
             if (!cooldownSurpassed) {
@@ -160,10 +148,11 @@ contract TurtleShellFirewall is ITurtleShellFirewall {
             }
         }
 
-        bool triggerFirewall = _checkIfParameterUpdateExceedsThreshold(
-            newParameter
-        );
-        if (triggerFirewall) _setFirewallStatus(true);
+        bool triggerFirewall = _checkIfParameterUpdateExceedsThreshold(newParameter);
+        if (triggerFirewall) {
+            _setFirewallStatus(true);
+            return true;
+        }
 
         _setParameter(newParameter);
         return triggerFirewall;
@@ -192,8 +181,9 @@ contract TurtleShellFirewall is ITurtleShellFirewall {
      */
     function decreaseParameter(uint256 decreaseAmount) external returns (bool) {
         uint256 currentParameter = getParameterOf(msg.sender);
-        if (currentParameter < decreaseAmount)
+        if (currentParameter < decreaseAmount) {
             revert TurtleShellFirewall__CannotHaveNegativeParameter();
+        }
         uint256 newParameter = currentParameter - decreaseAmount;
         return setParameter(newParameter);
     }
@@ -211,21 +201,23 @@ contract TurtleShellFirewall is ITurtleShellFirewall {
         uint256 blockInterval,
         uint256 startParameter,
         uint256 cooldownPeriod
-    ) external {
-        if (thresholdPercentage > 100 || thresholdPercentage == 0)
+    )
+        external
+    {
+        if (thresholdPercentage > 100 || thresholdPercentage == 0) {
             revert TurtleShellFirewall__InvalidThresholdValue();
-        if (blockInterval > block.number)
+        }
+        if (blockInterval > block.number) {
             revert TurtleShellFirewall__InvalidBlockInterval();
-        if (cooldownPeriod > block.number)
+        }
+        if (cooldownPeriod > block.number) {
             revert TurtleShellFirewall__InvalidCooldownPeriod();
-        if (startParameter > type(uint256).max / thresholdPercentage)
+        }
+        if (startParameter > type(uint256).max / thresholdPercentage) {
             revert TurtleShellFirewall__InvalidConfigValues();
+        }
 
-        s_firewallConfig[msg.sender] = FirewallConfig(
-            thresholdPercentage,
-            blockInterval,
-            cooldownPeriod
-        );
+        s_firewallConfig[msg.sender] = FirewallConfig(thresholdPercentage, blockInterval, cooldownPeriod);
         _setParameter(startParameter);
     }
 
@@ -241,20 +233,12 @@ contract TurtleShellFirewall is ITurtleShellFirewall {
 
     /// @inheritdoc ITurtleShellFirewall
     function getParameterOf(address user) public view returns (uint256) {
-        return
-            s_firewallData[user]
-                .parameters[s_firewallData[user].nonce - 1]
-                .parameter;
+        return s_firewallData[user].parameters[s_firewallData[user].nonce - 1].parameter;
     }
 
     /// @inheritdoc ITurtleShellFirewall
-    function getSecurityParameterConfigOf(
-        address user
-    ) external view returns (uint8, uint256) {
+    function getSecurityParameterConfigOf(address user) external view returns (uint8, uint256) {
         FirewallConfig memory m_firewallConfig = s_firewallConfig[user];
-        return (
-            m_firewallConfig.thresholdPercentage,
-            m_firewallConfig.blockInterval
-        );
+        return (m_firewallConfig.thresholdPercentage, m_firewallConfig.blockInterval);
     }
 }

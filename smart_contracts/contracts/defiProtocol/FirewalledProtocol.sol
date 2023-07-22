@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import {ITurtleShellFirewallIncreaser} from "../turtleshell/interfaces/ITurtleShellFirewallIncreaser.sol";
+import {ITurtleShellFirewallIncreaser} from "../turtleshell/sdk/interfaces/ITurtleShellFirewallIncreaser.sol";
 import {IProtocol} from "./interfaces/IProtocol.sol";
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";

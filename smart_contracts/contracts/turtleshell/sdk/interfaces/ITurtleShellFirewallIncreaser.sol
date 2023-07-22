@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import {ITurtleShellFirewall} from "./ITurtleShellFirewall.sol";
+import { ITurtleShellFirewall } from "../../core/interfaces/ITurtleShellFirewall.sol";
 
 /**
  * @title ITurtleShellFirewallIncreaser - Extension for the TurtleShell Firewall contract
