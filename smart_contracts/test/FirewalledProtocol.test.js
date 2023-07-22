@@ -17,20 +17,25 @@ const { developmentChains } = require("../helper-hardhat-config")
       const withdrawAmount = ethers.parseUnits("30", 6)
 
       beforeEach(async () => {
-        await deployments.fixture(["TurtleShellFirewall", "Usdc", "TurtleShellFreezer", "FirewalledProtocol"])
+        await deployments.fixture([
+          "TurtleShellFirewall",
+          "Usdc",
+          "TurtleShellFreezer",
+          "FirewalledProtocol",
+          "SetupFirewalledProtocol",
+          "TimeLock",
+        ])
 
         deployer = (await getNamedAccounts()).deployer
         user = (await getNamedAccounts()).user1
 
         usdc = await ethers.getContract("Usdc", deployer)
-        const usdcTokenAddress = await usdc.getAddress()
         turtleshell = await ethers.getContract("TurtleShellFirewall", deployer)
         turtleShellFreezer = await ethers.getContract("TurtleShellFreezer", deployer)
         turtleShellFreezerAddress = await turtleShellFreezer.getAddress()
 
         FirewalledProtocol = await ethers.getContract("FirewalledProtocol", deployer)
         firewalledProtocolAddress = await FirewalledProtocol.getAddress()
-        await FirewalledProtocol.initialize()
 
         const amount = ethers.parseUnits("10000", 6)
         await usdc.mint(deployer, amount)
@@ -120,7 +125,7 @@ const { developmentChains } = require("../helper-hardhat-config")
         })
 
         describe("Withdraw more than 15% of the total TVL", () => {
-          it("triggers firewall and reverts", async () => {
+          it("triggers firewall", async () => {
             const freezerBalanceBefore = await usdc.balanceOf(turtleShellFreezerAddress)
             const largeWithdrawAmount = ethers.parseUnits("2000", 6)
 
