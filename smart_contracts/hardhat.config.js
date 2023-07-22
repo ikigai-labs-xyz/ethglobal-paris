@@ -48,7 +48,7 @@ module.exports = {
     },
     mantle: {
       url: MANTLE_TESTNET_RPC_URL,
-      accounts: [DEPLOYER_PRIVATE_KEY, USER_PRIVATE_KEY],
+      accounts: [DEPLOYER_PRIVATE_KEY],
       saveDeployments: true,
       chainId: 5001,
     },
