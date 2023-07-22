@@ -23,7 +23,10 @@ module.exports = async hre => {
   const turtleshell = await ethers.getContract("TurtleShellFirewall", deployer)
   const turtleshellAddress = await turtleshell.getAddress()
 
-  const arguments = [usdcAddress, turtleshellAddress]
+  const turtleShellFreezer = await ethers.getContract("TurtleShellFreezer", deployer)
+  const turtleShellFreezerAddress = await turtleShellFreezer.getAddress()
+
+  const arguments = [usdcAddress, turtleshellAddress, turtleShellFreezerAddress]
   await deploy("FirewalledProtocol", {
     from: deployer,
     args: arguments,
@@ -43,6 +46,8 @@ module.exports = async hre => {
   log(`FirewalledProtocol initialized Turtlteshell parameters`)
 
   const contractAddress = await firewalledProtocol.getAddress()
+
+  await turtleShellFreezer.setProtocol(contractAddress)
 
   /***********************************
    *

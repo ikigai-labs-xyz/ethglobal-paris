@@ -25,4 +25,4 @@ module.exports = async hre => {
   })
 }
 
-module.exports.tags = ["all", "usdc"]
+module.exports.tags = ["all", "Usdc"]
