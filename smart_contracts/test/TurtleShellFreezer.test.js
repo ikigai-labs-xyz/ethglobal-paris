@@ -19,7 +19,7 @@ const { developmentChains } = require("../helper-hardhat-config")
         governorFreezer = await ethers.getContract("TurtleShellFreezer", deployer)
         usdc = await ethers.getContract("Usdc", protocol)
         governorUsdc = await ethers.getContract("Usdc", deployer)
-        tokenAddress = usdc.target
+        tokenAddress = await usdc.getAddress()
 
         const rawTokenAmount = 1000
         tokenAmount = ethers.parseEther(rawTokenAmount.toString())
@@ -30,7 +30,7 @@ const { developmentChains } = require("../helper-hardhat-config")
 
       describe("freezeFunds", () => {
         beforeEach(async () => {
-          await usdc.approve(turtleShellFreezer.target, tokenAmount)
+          await usdc.approve(turtleShellFreezer.getAddress(), tokenAmount)
         })
 
         it("reverts if caller not protocol", async () => {
@@ -39,7 +39,7 @@ const { developmentChains } = require("../helper-hardhat-config")
         })
 
         it("checks allowance", async () => {
-          await usdc.approve(turtleShellFreezer.target, 0)
+          await usdc.approve(turtleShellFreezer.getAddress(), 0)
           await expect(turtleShellFreezer.freezeFunds(user, tokenAmount, tokenAddress)).to.be.reverted
         })
 
@@ -50,9 +50,9 @@ const { developmentChains } = require("../helper-hardhat-config")
         })
 
         it("transfers tokens to freezer vault", async () => {
-          const vaultTokenBalanceBefore = await usdc.balanceOf(turtleShellFreezer.target)
+          const vaultTokenBalanceBefore = await usdc.balanceOf(turtleShellFreezer.getAddress())
           await turtleShellFreezer.freezeFunds(user, tokenAmount, tokenAddress)
-          const vaultTokenBalanceAfter = await usdc.balanceOf(turtleShellFreezer.target)
+          const vaultTokenBalanceAfter = await usdc.balanceOf(turtleShellFreezer.getAddress())
 
           expect(vaultTokenBalanceAfter).to.equal(vaultTokenBalanceBefore + tokenAmount)
         })
@@ -60,7 +60,7 @@ const { developmentChains } = require("../helper-hardhat-config")
 
       describe("returnFunds", () => {
         beforeEach(async () => {
-          await usdc.approve(turtleShellFreezer.target, tokenAmount)
+          await usdc.approve(turtleShellFreezer.getAddress(), tokenAmount)
           await turtleShellFreezer.freezeFunds(user, tokenAmount, tokenAddress)
         })
 
@@ -85,7 +85,7 @@ const { developmentChains } = require("../helper-hardhat-config")
 
       describe("unlockFunds", () => {
         beforeEach(async () => {
-          await usdc.approve(turtleShellFreezer.target, tokenAmount)
+          await usdc.approve(turtleShellFreezer.getAddress(), tokenAmount)
           await turtleShellFreezer.freezeFunds(user, tokenAmount, tokenAddress)
         })
 

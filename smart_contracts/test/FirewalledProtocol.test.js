@@ -5,7 +5,14 @@ const { developmentChains } = require("../helper-hardhat-config")
 !developmentChains.includes(network.name)
   ? describe.skip
   : describe("FirewalledProtocol", () => {
-      let deployer, user, FirewalledProtocol, turtleshell, turtleShellFreezer, firewalledProtocolAddress, usdc
+      let deployer,
+        user,
+        FirewalledProtocol,
+        turtleshell,
+        turtleShellFreezer,
+        turtleShellFreezerAddress,
+        firewalledProtocolAddress,
+        usdc
       const depositAmount = ethers.parseUnits("5000", 6)
       const withdrawAmount = ethers.parseUnits("30", 6)
 
@@ -19,6 +26,7 @@ const { developmentChains } = require("../helper-hardhat-config")
         const usdcTokenAddress = await usdc.getAddress()
         turtleshell = await ethers.getContract("TurtleShellFirewall", deployer)
         turtleShellFreezer = await ethers.getContract("TurtleShellFreezer", deployer)
+        turtleShellFreezerAddress = await turtleShellFreezer.getAddress()
 
         FirewalledProtocol = await ethers.getContract("FirewalledProtocol", deployer)
         firewalledProtocolAddress = await FirewalledProtocol.getAddress()
@@ -113,7 +121,7 @@ const { developmentChains } = require("../helper-hardhat-config")
 
         describe("Withdraw more than 15% of the total TVL", () => {
           it("triggers firewall and reverts", async () => {
-            const freezerBalanceBefore = await usdc.balanceOf(turtleShellFreezer.target)
+            const freezerBalanceBefore = await usdc.balanceOf(turtleShellFreezerAddress)
             const largeWithdrawAmount = ethers.parseUnits("2000", 6)
 
             await FirewalledProtocol.withdraw(largeWithdrawAmount)
@@ -122,7 +130,7 @@ const { developmentChains } = require("../helper-hardhat-config")
             assert.equal(firewallStatus, true)
 
             // check if funds got transferred to turtleshell freezer
-            const freezerBalance = await usdc.balanceOf(turtleShellFreezer.target)
+            const freezerBalance = await usdc.balanceOf(turtleShellFreezerAddress)
             assert.equal(freezerBalance.toString(), (freezerBalanceBefore + largeWithdrawAmount).toString())
           })
         })
