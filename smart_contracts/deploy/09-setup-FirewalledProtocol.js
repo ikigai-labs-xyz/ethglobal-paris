@@ -30,6 +30,10 @@ module.exports = async hre => {
     `Transferred ownership of the FirewalledProtocol (${firewalledProtocolAddress}) to the timelock (${timelockAddress})`,
   )
 
+  const transferOwnershipOfFreezerTx = await turtleShellFreezer.transferOwnership(timelockAddress)
+  await transferOwnershipOfFreezerTx.wait(1)
+  log(`Transferred ownership of TurtleShellFreezer (${turtleShellFreezerAddress}) to the timelock (${timelockAddress})`)
+
   log("---------------------------------")
 }
 
