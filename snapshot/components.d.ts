@@ -9,7 +9,6 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
-    AboutMembersListItem: typeof import('./src/components/AboutMembersListItem.vue')['default']
     AboutSubheader: typeof import('./src/components/AboutSubheader.vue')['default']
     AvatarOverlayEdit: typeof import('./src/components/AvatarOverlayEdit.vue')['default']
     AvatarSpace: typeof import('./src/components/AvatarSpace.vue')['default']
