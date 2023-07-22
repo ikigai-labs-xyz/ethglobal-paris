@@ -58,6 +58,18 @@ module.exports = {
       saveDeployments: true,
       chainId: 5,
     },
+    polygon: {
+      url: "https://polygon-rpc.com/",
+      accounts: [DEPLOYER_PRIVATE_KEY],
+      saveDeployments: true,
+      chainId: 137,
+    },
+    gnosisChain: {
+      url: "https://rpc.gnosischain.com",
+      accounts: [DEPLOYER_PRIVATE_KEY],
+      saveDeployments: true,
+      chainId: 100,
+    },
   },
   etherscan: {
     apiKey: {
