@@ -1,6 +1,7 @@
 import values from "../../Data/Values"
 
 import TVL from "./TVL"
+import Freezed from "./Freezed"
 
 function Overview() {
 	return (
@@ -21,9 +22,12 @@ function Overview() {
 				</div>
 
 				<div className="col-start-5 col-span-4  rounded-lg border border-gray-200 bg-white shadow-md ">
-					<div className="text-black border-b border-slate-800/40">Borrow</div>
+					<div className="text-black border-b border-slate-800/40">❄️ Freezed Funds</div>
 					<div className="flex flex-row items-center justify-center gap-3 py-2">
-						<div className="text-slate-800 text-lg">fetching data ...</div>
+						<div className="text-slate-800 text-lg">USDC</div>
+						<div className="text-slate-800 text-lg">
+							<Freezed />
+						</div>
 					</div>
 				</div>
 
