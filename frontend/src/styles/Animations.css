@@ -18,6 +18,10 @@
     animation: fadeInUp 2s;
 }
 
+.fadeInDown{
+  animation: fadeInDown 3s;
+}
+
 @keyframes pulse {
     0% {
       transform: scale(1);
