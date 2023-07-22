@@ -3,7 +3,7 @@ import 'animate.css';
 import poap from '../assets/poap.svg';
 
 const query = `query PoapsValerioFicheraEth {
-  Poaps(input: { filter: { owner: { _eq: "vitalik.eth" } }, blockchain: ALL, limit: 10 }) {
+  Poaps(input: { filter: { owner: { _eq: "keinberger.eth" } }, blockchain: ALL, limit: 10 }) {
     Poap {
       eventId
       poapEvent {
@@ -53,7 +53,7 @@ export default function POAPs() {
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="flex lg:flex-row-reverse flex-col-reverse items-center justify-items-center pb-5">
         <span className="lg:text-left text-center text-6xl font-medium text-purple-800 pl-5">
-          Vitalik's POAPs
+            Our Team's POAPs
           <p className="text-2xl font-medium text-purple-800">powered by Airstack react SDK</p>
         </span>
         <img
