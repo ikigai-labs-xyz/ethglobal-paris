@@ -88,3 +88,57 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
     console.log(account.address)
   }
 })
+
+// hh vote --network localhost --proposalid string
+task("vote", "Vote on proposal")
+  .addParam("proposalid", "The proposal id to vote on")
+  .setAction(async taskArgs => {
+    const governor = await ethers.getContract("ProtocolGovernor")
+    const proposalId = taskArgs.proposalid // Get proposalId from command line argument
+    console.log(`Voting on proposal ${proposalId}`)
+
+    const voteWay = 1
+    const reason = "I vote yes"
+    const tx = await governor.castVoteWithReason(proposalId, voteWay, reason)
+    await tx.wait()
+    console.log("Voted successfully")
+  })
+
+// hh queue --network localhost --user address --token address --description text
+task("queue", "Queue a proposal")
+  .addParam("user", "The user to transfer the frozen funds to")
+  .addParam("token", "The token to transfer")
+  .addParam("description", "The proposal description")
+  .setAction(async taskArgs => {
+    const governor = await ethers.getContract("ProtocolGovernor")
+    const turtleShellFreezer = await ethers.getContract("TurtleShellFreezer")
+    const turtleShellFreezerAddress = await turtleShellFreezer.getAddress()
+    const user = taskArgs.user // Get user address from command line argument
+    const tokenAddress = taskArgs.token // Get token address from command line argument
+    const proposal_description = taskArgs.description // Get proposal description from command line argument
+    const transferCalldata = turtleShellFreezer.interface.encodeFunctionData("unlockFunds", [user, tokenAddress])
+    const descriptionHash = ethers.id(proposal_description)
+
+    await governor.queue([turtleShellFreezerAddress], [0], [transferCalldata], descriptionHash)
+    console.log("Queued successfully")
+  })
+
+// hh execute --network localhost --user address --token address --description text
+task("execute", "Execute a proposal")
+  .addParam("user", "The user to transfer the frozen funds to")
+  .addParam("token", "The token to transfer")
+  .addParam("description", "The proposal description")
+  .setAction(async taskArgs => {
+    const governor = await ethers.getContract("ProtocolGovernor")
+    const turtleShellFreezer = await ethers.getContract("TurtleShellFreezer")
+    const turtleShellFreezerAddress = await turtleShellFreezer.getAddress()
+    const user = taskArgs.user // Get user address from command line argument
+    const tokenAddress = taskArgs.token // Get token address from command line argument
+    const proposal_description = taskArgs.description // Get proposal description from command line argument
+    const transferCalldata = turtleShellFreezer.interface.encodeFunctionData("unlockFunds", [user, tokenAddress])
+    const descriptionHash = ethers.id(proposal_description)
+
+    const executeTx = await governor.execute([turtleShellFreezerAddress], [0], [transferCalldata], descriptionHash)
+    await executeTx.wait()
+    console.log("Executed successfully")
+  })
