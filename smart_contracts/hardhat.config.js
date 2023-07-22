@@ -70,6 +70,12 @@ module.exports = {
       saveDeployments: true,
       chainId: 100,
     },
+    gnosisChainTestnet: {
+      url: "https://rpc.chiadochain.net",
+      accounts: [DEPLOYER_PRIVATE_KEY],
+      saveDeployments: true,
+      chainId: 10200,
+    },
   },
   etherscan: {
     apiKey: {
