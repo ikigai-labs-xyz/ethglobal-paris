@@ -13,11 +13,11 @@ function Freezed() {
 		// eslint-disable-next-line
 		contractAddress = contractAddresses["31337"]["firewalledProtocol"]
 		// eslint-disable-next-line
-		usdc = "0x4ff1f64683785E0460c24A4EF78D582C2488704f"
+		usdc = contractAddresses["31337"]["usdc"]
 	}
 
 	const { data, isError, isLoading, error } = useBalance({
-		address: contractAddress as `0x${string}`,
+		address: "0x4ff1f64683785E0460c24A4EF78D582C2488704f",
 		chainId: 31337,
 		token: usdc as `0x${string}`,
 		watch: true,
@@ -38,4 +38,4 @@ function Freezed() {
 	return <>{formattedData}</>
 }
 
-export default Freezed;
+export default Freezed

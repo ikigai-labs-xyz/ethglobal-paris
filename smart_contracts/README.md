@@ -1,13 +1,12 @@
 # Sample Hardhat Project
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+### Goerli
 
-Try running some of the following tasks:
-
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.js
-```
+GovernanceToken: 0x8Cbabf84DEC772f34B00F246351d66cCd7826458
+TimeLock: 0xCadf004e1C7fE887775bac1B62641CFE4605a265
+ProtocolGovernor: 0x730Db371D92778C32891c17a743699CA1440718F
+TurtleShellFirewall: 0xdaA049cC60550CA2de34A5056641dE5D654A92A2
+TurtleShellFreezer: 0xB0Fd2d285894Fa56798D6E697F8CaC97B9593E18
+Mock USDC: 0x8163d00b81122A04D5B199A6737CbdE11cf2CEc0
+NonFirewalledProtocol: 0xeb350c1491B8a82B60Bd95f0f598f33eE5865B46
+FirewalledProtocol: 0xB6a06C93406E53a7e1a1Df5CE33d9322DB861Fe6
