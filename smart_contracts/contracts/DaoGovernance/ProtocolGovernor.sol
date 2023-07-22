@@ -18,7 +18,7 @@ contract ProtocolGovernor is
         IVotes _token,
         TimelockController _timelock
     )
-        Governor("MyGovernor")
+        Governor("ProtocolGovernor")
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(4)
         GovernorTimelockControl(_timelock)
