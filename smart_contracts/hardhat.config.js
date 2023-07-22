@@ -55,7 +55,7 @@ module.exports = {
     },
     goerli: {
       url: GOERLI_RPC_URL,
-      accounts: [PRIVATE_KEY],
+      accounts: [DEPLOYER_PRIVATE_KEY],
       saveDeployments: true,
       chainId: 5,
     },
