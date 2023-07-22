@@ -23,9 +23,6 @@ module.exports = async (hre) => {
   log("---------------------------------");
   log(`Deploy GovernanceToken with owner : ${deployer}`);
 
-  const usdc = await ethers.getContract("Usdc", deployer);
-  const usdcAddress = await usdc.getAddress();
-
   const arguments = [];
   await deploy("GovernanceToken", {
     from: deployer,
