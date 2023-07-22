@@ -15,6 +15,7 @@ module.exports = async (hre) => {
   const timeLock = await ethers.getContract("TimeLock", deployer);
   const governor = await ethers.getContract("ProtocolGovernor", deployer);
   const governorAddress = await governor.getAddress();
+  const governanceToken = await ethers.getContract("GovernanceToken", deployer);
 
   log("----------------------------------------------------");
   log("Setting up governance roles...");
@@ -29,6 +30,12 @@ module.exports = async (hre) => {
   await executorTx.wait(1);
   const revokeTx = await timeLock.revokeRole(adminRole, deployer); // anything the timelock wants to do has to go through the governance process
   await revokeTx.wait(1);
+
+  const delegateTx = await governanceToken.delegate(deployer);
+  await delegateTx.wait();
+  log(
+    `Delegated all voting power of (${deployer}) to (${deployer}). (obligatory step)`
+  );
 
   log("----------------------------------------------------");
 };
