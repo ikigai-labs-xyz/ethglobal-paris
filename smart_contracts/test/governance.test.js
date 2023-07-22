@@ -100,8 +100,7 @@ const VOTING_PERIOD = 13; // Time during which you can vote after a proposal is 
           [transferCalldata],
           descriptionHash
         );
-        await queueTx.wait(1);
-
+        await queueTx.wait();
         await moveTime(MIN_DELAY + 1);
         await moveBlocks(1);
 
