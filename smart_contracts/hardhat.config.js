@@ -58,11 +58,11 @@ module.exports = {
       saveDeployments: true,
       chainId: 5,
     },
-    polygon: {
-      url: "https://polygon-rpc.com/",
+    polygonZkEvm: {
+      url: "https://rpc.public.zkevm-test.net",
       accounts: [DEPLOYER_PRIVATE_KEY],
       saveDeployments: true,
-      chainId: 137,
+      chainId: 1442,
     },
     gnosisChain: {
       url: "https://rpc.gnosischain.com",
