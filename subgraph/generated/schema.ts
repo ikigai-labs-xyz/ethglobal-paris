@@ -29,13 +29,23 @@ export class Protocol extends Entity {
     }
   }
 
+  static loadInBlock(id: Bytes): Protocol | null {
+    return changetype<Protocol | null>(
+      store.get_in_block("Protocol", id.toHexString())
+    );
+  }
+
   static load(id: Bytes): Protocol | null {
     return changetype<Protocol | null>(store.get("Protocol", id.toHexString()));
   }
 
   get id(): Bytes {
     let value = this.get("id");
-    return value!.toBytes();
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBytes();
+    }
   }
 
   set id(value: Bytes) {
@@ -44,7 +54,11 @@ export class Protocol extends Entity {
 
   get firewallStatus(): boolean {
     let value = this.get("firewallStatus");
-    return value!.toBoolean();
+    if (!value || value.kind == ValueKind.NULL) {
+      return false;
+    } else {
+      return value.toBoolean();
+    }
   }
 
   set firewallStatus(value: boolean) {
