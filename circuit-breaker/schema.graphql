@@ -1,0 +1,4 @@
+type Protocol @entity(immutable: true) {
+	id: Bytes!
+	firewallStatus: Boolean!
+}

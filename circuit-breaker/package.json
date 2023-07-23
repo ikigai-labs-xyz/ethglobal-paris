@@ -1,0 +1,20 @@
+{
+	"name": "circuit-breaker",
+	"license": "UNLICENSED",
+	"scripts": {
+		"codegen": "graph codegen",
+		"build": "graph build",
+		"deploy": "graph deploy --node https://api.thegraph.com/deploy/ keinberger/circuit-breaker",
+		"create-local": "graph create --node http://localhost:8020/ keinberger/circuit-breaker",
+		"remove-local": "graph remove --node http://localhost:8020/ keinberger/circuit-breaker",
+		"deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 keinberger/circuit-breaker",
+		"test": "graph test"
+	},
+	"dependencies": {
+		"@graphprotocol/graph-cli": "0.42.3",
+		"@graphprotocol/graph-ts": "0.29.1"
+	},
+	"devDependencies": {
+		"matchstick-as": "0.5.0"
+	}
+}

@@ -1,0 +1,8 @@
+{
+  "goerli": {
+    "TurtleShellFirewall": {
+      "address": "0xdaA049cC60550CA2de34A5056641dE5D654A92A2",
+      "startBlock": 9390588
+    }
+  }
+}

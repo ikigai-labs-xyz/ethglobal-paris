@@ -1,6 +1,6 @@
 {
-  "wrapperSrc": "near/widget/DIG.Theme",
-  "wrapperProps": {},
-  "networkId": "mainnet",
-  "accessKey": "ed25519:5T6fYTetXK1t7jSZWFMcnAEWmTEZime72qGFnJXoE9z1VU5ux8kZyngHPn5bHPV96rJJXAjdz6ZEAKax2QhG1LC9"
+	"wrapperSrc": "near/widget/DIG.Theme",
+	"wrapperProps": {},
+	"networkId": "mainnet",
+	"accessKey": "ed25519:5T6fYTetXK1t7jSZWFMcnAEWmTEZime72qGFnJXoE9z1VU5ux8kZyngHPn5bHPV96rJJXAjdz6ZEAKax2QhG1LC9"
 }

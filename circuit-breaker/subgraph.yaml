@@ -1,0 +1,25 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: TurtleShellFirewall
+    network: goerli
+    source:
+      address: "0xdaA049cC60550CA2de34A5056641dE5D654A92A2"
+      abi: TurtleShellFirewall
+      startBlock: 9390588
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - FirewallStatusUpdate
+        - ParameterChanged
+      abis:
+        - name: TurtleShellFirewall
+          file: ./abis/TurtleShellFirewall.json
+      eventHandlers:
+        - event: FirewallStatusUpdate(indexed address,indexed bool)
+          handler: handleFirewallStatusUpdate
+      file: ./src/turtle-shell-firewall.ts
