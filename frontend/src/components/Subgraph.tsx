@@ -1,7 +1,7 @@
 
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 
-import "./Cookie3.css"
+
 import { useQuery, gql } from "@apollo/client"
 
 const GET_MINTED_SMART_CONTRACT_NFTS = gql`
