@@ -68,10 +68,10 @@ module.exports = {
       chainId: 137,
     },
     gnosisChain: {
-      url: "https://rpc.gnosischain.com",
+      url: "https://rpc.chiadochain.net",
       accounts: [DEPLOYER_PRIVATE_KEY],
       saveDeployments: true,
-      chainId: 100,
+      chainId: 10200,
     },
     neon: {
       url: NEON_TESTNET_RPC_URL,
