@@ -20,6 +20,9 @@ const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY
 const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL
 const PRIVATE_KEY = process.env.PRIVATE_KEY
 
+const NEON_TESTNET_RPC_URL = process.env.NEON_TESTNET_RPC_URL
+const CELO_TESTNET_RPC_URL = process.env.CELO_TESTNET_RPC_URL
+
 module.exports = {
   solidity: {
     compilers: [
@@ -69,6 +72,20 @@ module.exports = {
       accounts: [DEPLOYER_PRIVATE_KEY],
       saveDeployments: true,
       chainId: 100,
+    },
+    neon: {
+      url: NEON_TESTNET_RPC_URL,
+      accounts: [DEPLOYER_PRIVATE_KEY],
+      saveDeployments: true,
+      chainId: 245022926,
+      gasPrice: 1000000000000,
+      gasLimit: 2000000,
+    },
+    celo: {
+      url: CELO_TESTNET_RPC_URL,
+      accounts: [DEPLOYER_PRIVATE_KEY],
+      saveDeployments: true,
+      chainId: 44787,
     },
   },
   etherscan: {
